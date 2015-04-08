@@ -9,7 +9,6 @@
 #include "GeometryModifyTool.hpp"
 #include "GeometryQueryTool.hpp"
 #include "GMem.hpp"
-#include "SenseEntity.hpp"
 #include "Surface.hpp"
 #include "RefVertex.hpp"
 #include "RefEdge.hpp"
@@ -37,7 +36,7 @@ int main( int argc, char** argv ) {
   CubitStatus status = InitCGMA::initialize_cgma();
   if (CUBIT_SUCCESS != status) return 1;
   GeometryQueryTool *gti = GeometryQueryTool::instance();
-   
+
   // Read in the geometry from files specified on the command line
   const char* filename = "cube.stp";
   status = CubitCompat_import_solid_model(filename, "STEP");
@@ -45,14 +44,14 @@ int main( int argc, char** argv ) {
     PRINT_ERROR("Problems reading geometry file %s.\n", filename);
     return 1;
   }
- 
+
   DLIList<RefEntity*> my_surfs;
   const char name[] = "Surface";
 
   gti->ref_entity_list( &(name[0]), my_surfs, true);
   my_surfs.reset();
 
-  std::vector<CubitVector> points;  
+  std::vector<CubitVector> points;
   for(unsigned int i = 0 ; i < my_surfs.size(); i++)
     {
 
@@ -61,34 +60,30 @@ int main( int argc, char** argv ) {
       RefFace *this_surf = dynamic_cast<RefFace*> (my_surfs[i]);
       this_surf->get_graphics(data, 5, 1e-02);
 
-      
+
 
 
       RefEntity *ent = dynamic_cast<RefEntity*>(my_surfs[i]);
 
       std::cout << "-------------------------" << std::endl;
-      
-      std::cout << "Surface id: " << ent->id() << std::endl; 
-      
+
+      std::cout << "Surface id: " << ent->id() << std::endl;
+
       std::cout << "-------------------------" << std::endl;
 
 
-      SenseEntity *cf = this_surf->get_first_sense_entity_ptr();
-      bool sense = false; 
-      if ( cf->get_sense() == this_surf->get_surface_ptr()->bridge_sense() ) sense = true;
-      std::cout << "ReadCGM Sense: " << sense  << std::endl;
-      
+
       for( unsigned int j = 0; j < data.pointListCount; j++)
 	{
 	CubitVector point(data.point_list()[j].x,
 			  data.point_list()[j].y,
-			  data.point_list()[j].z ); 
+			  data.point_list()[j].z );
 
-	std::cout << "Point " << j << std::endl; 
-	std::cout << "x: " << point.x() << std::endl; 
-	std::cout << "y: " << point.y() << std::endl; 
-	std::cout << "z: " << point.z() << std::endl; 
-	
+	std::cout << "Point " << j << std::endl;
+	std::cout << "x: " << point.x() << std::endl;
+	std::cout << "y: " << point.y() << std::endl;
+	std::cout << "z: " << point.z() << std::endl;
+
 	}
 
 
@@ -98,27 +93,25 @@ int main( int argc, char** argv ) {
 
       int* facet = data.facet_list() + j;
 
-      std::cout << "Triangle " << tri_num << std::endl; 
+      std::cout << "Triangle " << tri_num << std::endl;
       tri_num++;
-      
+
       std::vector<MBCartVect> verts;
-      
+
       for( unsigned int k=1; k <= *facet ; k++)
 	{
 	std::cout << facet[k] << "\t";
 
-
-
 	CubitVector point(data.point_list()[facet[k]].x,
 			  data.point_list()[facet[k]].y,
-			  data.point_list()[facet[k]].z ); 
+			  data.point_list()[facet[k]].z );
 
 	MBCartVect vert( point.x(), point.y(), point.z() );
 
 	verts.push_back(vert);
-	
+
 	}
-      
+
       MBCartVect tri_center = (1.0/3.0)*(verts[0] + verts[1] + verts[2] );
       tri_center.normalize();
 
@@ -126,16 +119,16 @@ int main( int argc, char** argv ) {
       verts[2] -= verts[0];
       MBCartVect norm = verts[1] * verts[2];
       norm.normalize();
-      
-      std::cout << std::endl;
-
       std::cout << "Normal: " <<  norm  << std::endl;
+      std::cout << "TriCtr: " <<  tri_center  << std::endl;
       std::cout << "Dot w/ Surf Normal: " << tri_center % norm << std::endl;
 
+
+      std::cout << std::endl;
       }//end facet index loop
 
       std::cout << "-------------------------" << std::endl;
-      
+
     }//end surface loop
 
   exit(0);
